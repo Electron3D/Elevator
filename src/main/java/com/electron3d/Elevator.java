@@ -25,4 +25,12 @@ public class Elevator {
     public Direction chooseDirection() {
         return Direction.DOWN;
     }
+
+    @Override
+    public String toString() {
+        return "Elevator{" +
+                "passengers=" + passengers +
+                ", currentFloor=" + currentFloor +
+                '}';
+    }
 }
