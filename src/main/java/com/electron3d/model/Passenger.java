@@ -1,4 +1,4 @@
-package com.electron3d;
+package com.electron3d.model;
 
 public class Passenger {
     private int currentFloor;
