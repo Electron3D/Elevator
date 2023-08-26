@@ -1,23 +1,28 @@
 package com.electron3d.model;
 
 public class Passenger {
-    private int currentFloor;
-    private final int destinationFloor;
+    private int startFloor;
+    private int destinationFloor;
 
-    public Passenger(int currentFloor, int destinationFloor) {
-        this.currentFloor = currentFloor;
+
+    public Passenger(int startFloor, int destinationFloor) {
+        this.startFloor = startFloor;
         this.destinationFloor = destinationFloor;
     }
 
-    public int getCurrentFloor() {
-        return currentFloor;
+    public int getStartFloor() {
+        return startFloor;
     }
 
-    public void setCurrentFloor(int currentFloor) {
-        this.currentFloor = currentFloor;
+    public void setStartFloor(int startFloor) {
+        this.startFloor = startFloor;
     }
 
     public int getDestinationFloor() {
         return destinationFloor;
+    }
+
+    public void setDestinationFloor(int destinationFloor) {
+        this.destinationFloor = destinationFloor;
     }
 }
