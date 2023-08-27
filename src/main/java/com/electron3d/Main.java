@@ -5,6 +5,7 @@ import com.electron3d.model.Building;
 import com.electron3d.model.Elevator;
 import com.electron3d.model.Floor;
 import com.electron3d.model.Passenger;
+import com.electron3d.util.Util;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,23 +33,11 @@ public class Main {
             List<Passenger> passengers = new ArrayList<>();
             int thisFloorPassengers = random.nextInt(0, 11);
             for (int j = 0; j < thisFloorPassengers; j++) {
-                int destinationFloor = getRandomDestinationFloor(random, 1, floorsCount, currentFloor);
+                int destinationFloor = Util.getRandomDestinationFloor(1, floorsCount, currentFloor);
                 passengers.add(new Passenger(currentFloor, destinationFloor));
             }
             floors.add(new Floor(currentFloor, passengers));
         }
         return floors;
-    }
-
-    public static int getRandomDestinationFloor(Random rnd, int start, int end, int currentFloor) {
-        int destinationFloor = start + rnd.nextInt(end - start);
-        if (destinationFloor == currentFloor) {
-            if (destinationFloor < end) {
-                destinationFloor++;
-            } else {
-                destinationFloor--;
-            }
-        }
-        return destinationFloor;
     }
 }

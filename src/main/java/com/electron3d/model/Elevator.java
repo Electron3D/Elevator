@@ -42,14 +42,18 @@ public class Elevator {
         return arrivedPassengers;
     }
 
-    public void takePassengers(List<Passenger> newPassengers) {
+    public List<Passenger> takePassengers(List<Passenger> newPassengers) {
+        List<Passenger> takenPassengers = new ArrayList<>();
         for (Passenger passenger : newPassengers) {
             if (checkPassengersLimit()) {
                 break;
             }
-            //check direction
-            passengers.add(passenger);
+            if (currentDirection.equals(passenger.getDirection())) {
+                passengers.add(passenger);
+                takenPassengers.add(passenger);
+            }
         }
+        return takenPassengers;
     }
 
     public boolean checkPassengersLimit() {
