@@ -21,10 +21,20 @@ public class Elevator {
         return currentFloor;
     }
 
+    public Direction getCurrentDirection() {
+        return currentDirection;
+    }
+
+    public List<Passenger> getPassengers() {
+        return passengers;
+    }
+
     public int move(Direction direction) {
         if (direction.equals(Direction.UP)) {
+            currentDirection = Direction.UP;
             return ++currentFloor;
         } else {
+            currentDirection = Direction.DOWN;
             return --currentFloor;
         }
     }

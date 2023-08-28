@@ -18,7 +18,7 @@ public class Building {
     }
 
     public Floor getFloor(int number) {
-        return floors.get(number);
+        return floors.get(number - 1);
     }
 
     public Elevator getElevator() {
