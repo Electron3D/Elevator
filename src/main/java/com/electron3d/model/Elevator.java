@@ -29,13 +29,11 @@ public class Elevator {
         return passengers;
     }
 
-    public int move(Direction direction) {
-        if (direction.equals(Direction.UP)) {
-            currentDirection = Direction.UP;
-            return ++currentFloor;
+    public void move() {
+        if (currentDirection.equals(Direction.UP)) {
+            currentFloor++;
         } else {
-            currentDirection = Direction.DOWN;
-            return --currentFloor;
+            currentFloor--;
         }
     }
 
@@ -68,5 +66,9 @@ public class Elevator {
 
     public boolean checkPassengersLimit() {
         return passengers.size() >= PASSENGERS_LIMIT;
+    }
+
+    public void setCurrentDirection(Direction currentDirection) {
+        this.currentDirection = currentDirection;
     }
 }

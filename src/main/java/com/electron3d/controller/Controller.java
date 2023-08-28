@@ -8,6 +8,7 @@ import com.electron3d.model.Passenger;
 import com.electron3d.util.Util;
 import com.electron3d.view.ViewPrinter;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -34,7 +35,7 @@ public class Controller {
             List<Passenger> currentFloorPassengers = currentFloor.getPassengers();
 
             List<Passenger> releasedPassengers = elevator.releasePassengers();
-            Direction direction = chooseDirection(currentFloorPassengers);
+            elevator.setCurrentDirection(chooseDirection(currentFloorPassengers));
 
             List<Passenger> takenPassengers = elevator.takePassengers(currentFloorPassengers);
             currentFloorPassengers.removeAll(takenPassengers);
@@ -42,9 +43,9 @@ public class Controller {
             releasedPassengers.forEach(this::updatePassengersGoals);
             currentFloorPassengers.addAll(releasedPassengers);
 
-            int newFloor = elevator.move(direction);
+            elevator.move();
             try {
-                Thread.sleep(1000);
+                Thread.sleep(500);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
@@ -55,26 +56,29 @@ public class Controller {
     private Direction chooseDirection(List<Passenger> currentFloorPassengers) {
         List<Passenger> passengers = elevator.getPassengers();
         if (passengers.isEmpty()) {
-            return currentFloorPassengers
-                    .stream()
-                    .map(Passenger::getDirection)
-                    .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()))
-                    .entrySet()
-                    .stream()
-                    .sorted()
-                    .findFirst()
-                    .map(Map.Entry::getKey).orElse(Direction.DOWN);
+            if (currentFloorPassengers.isEmpty()) {
+                if (elevator.getCurrentFloor() == 1) {
+                    return Direction.UP;
+                } else {
+                    return Direction.DOWN;
+                }
+            } else {
+                return currentFloorPassengers
+                        .stream()
+                        .map(Passenger::getDirection)
+                        .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()))
+                        .entrySet().stream()
+                        .max(Comparator.comparing(Map.Entry::getValue))
+                        .map(Map.Entry::getKey)
+                        .orElseThrow(() -> new RuntimeException("exception in the stream"));
+            }
+        } else {
+            if (elevator.getCurrentFloor() == 1) {
+                return Direction.UP;
+            } else {
+                return elevator.getCurrentDirection();
+            }
         }
-        Integer maxFloor = passengers
-                .stream()
-                .map(Passenger::getDestinationFloor)
-                .distinct()
-                .max(Integer::compare)
-                .orElse(1);
-        if (elevator.getCurrentFloor() < maxFloor || elevator.getCurrentFloor() == 1) {
-            return Direction.UP;
-        }
-        return Direction.DOWN;
     }
 
     public void updatePassengersGoals(Passenger passenger) {
