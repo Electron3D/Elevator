@@ -8,11 +8,12 @@ import com.electron3d.model.Passenger;
 import com.electron3d.util.Util;
 import com.electron3d.view.ViewPrinter;
 
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+
+import static com.electron3d.Main.FIRST_FLOOR;
 
 public class Controller {
     private final ViewPrinter printer;
@@ -32,7 +33,7 @@ public class Controller {
             printer.print();
             int currentFloorNumber = elevator.getCurrentFloor();
             Floor currentFloor = building.getFloor(currentFloorNumber);
-            List<Passenger> currentFloorPassengers = currentFloor.getPassengers();
+            List<Passenger> currentFloorPassengers = currentFloor.passengers();
 
             List<Passenger> releasedPassengers = elevator.releasePassengers();
             elevator.setCurrentDirection(chooseDirection(currentFloorPassengers));
@@ -52,38 +53,29 @@ public class Controller {
         }
     }
 
-    //under construction
     private Direction chooseDirection(List<Passenger> currentFloorPassengers) {
         List<Passenger> passengers = elevator.getPassengers();
         if (passengers.isEmpty()) {
             if (currentFloorPassengers.isEmpty()) {
-                if (elevator.getCurrentFloor() == 1) {
-                    return Direction.UP;
-                } else {
-                    return Direction.DOWN;
-                }
+                return elevator.getCurrentFloor() == FIRST_FLOOR ? Direction.UP : Direction.DOWN;
             } else {
                 return currentFloorPassengers
                         .stream()
                         .map(Passenger::getDirection)
                         .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()))
                         .entrySet().stream()
-                        .max(Comparator.comparing(Map.Entry::getValue))
+                        .max(Map.Entry.comparingByValue())
                         .map(Map.Entry::getKey)
                         .orElseThrow(() -> new RuntimeException("exception in the stream"));
             }
         } else {
-            if (elevator.getCurrentFloor() == 1) {
-                return Direction.UP;
-            } else {
-                return elevator.getCurrentDirection();
-            }
+            return elevator.getCurrentFloor() == FIRST_FLOOR ? Direction.UP : elevator.getCurrentDirection();
         }
     }
 
     public void updatePassengersGoals(Passenger passenger) {
         passenger.setStartFloor(passenger.getDestinationFloor());
         passenger.setDestinationFloor(
-                Util.getRandomDestinationFloor(1, floorsCount, passenger.getDestinationFloor()));
+                Util.getRandomDestinationFloor(FIRST_FLOOR, floorsCount, passenger.getStartFloor()));
     }
 }

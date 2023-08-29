@@ -1,7 +1,6 @@
 package com.electron3d.model;
 
 import com.electron3d.Direction;
-import com.electron3d.util.Util;
 
 public class Passenger {
     private int startFloor;
@@ -29,10 +28,6 @@ public class Passenger {
     }
 
     public Direction getDirection() {
-        if (destinationFloor - startFloor > 0) {
-            return Direction.UP;
-        } else {
-            return Direction.DOWN;
-        }
+        return destinationFloor - startFloor > 0 ? Direction.UP : Direction.DOWN;
     }
 }
