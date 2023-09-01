@@ -8,17 +8,16 @@ import com.electron3d.util.Util;
 import java.util.ArrayList;
 
 public class Main {
-    private static int floorsCount;
     public static final int FIRST_FLOOR = 1;
 
     public static void main(String[] args) {
         Building building = init();
-        Controller controller = new Controller(building, floorsCount);
+        Controller controller = new Controller(building);
         controller.start();
     }
     private static Building init() {
-        floorsCount = Util.getRandomBuildingHigh(5, 20);
+        int floorsCount = Util.getRandomBuildingHigh(5, 20);
         Elevator elevator = new Elevator(new ArrayList<>(), FIRST_FLOOR);
-        return new Building(floorsCount, Util.populateBuilding(floorsCount), elevator);
+        return new Building(Util.populateBuilding(floorsCount), elevator);
     }
 }

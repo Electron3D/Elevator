@@ -21,10 +21,10 @@ public class Controller {
     private final Elevator elevator;
     private final int floorsCount;
 
-    public Controller(Building building, int floorsCount) {
+    public Controller(Building building) {
         this.building = building;
         this.elevator = building.getElevator();
-        this.floorsCount = floorsCount;
+        this.floorsCount = building.getFloorsCount();
         printer = new ViewPrinter(building);
     }
 

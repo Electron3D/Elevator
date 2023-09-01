@@ -7,8 +7,8 @@ public class Building {
     private final List<Floor> floors;
     private final Elevator elevator;
 
-    public Building(int floorsCount, List<Floor> floors, Elevator elevator) {
-        this.floorsCount = floorsCount;
+    public Building(List<Floor> floors, Elevator elevator) {
+        this.floorsCount = floors.size();
         this.floors = floors;
         this.elevator = elevator;
     }
