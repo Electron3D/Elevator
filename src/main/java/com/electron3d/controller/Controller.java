@@ -5,7 +5,6 @@ import com.electron3d.model.Building;
 import com.electron3d.model.Elevator;
 import com.electron3d.model.Floor;
 import com.electron3d.model.Passenger;
-import com.electron3d.util.Util;
 import com.electron3d.view.ViewPrinter;
 
 import java.util.List;
@@ -20,6 +19,7 @@ public class Controller {
     private final Building building;
     private final Elevator elevator;
     private final int floorsCount;
+    private int floorsDoneCounter;
 
     public Controller(Building building) {
         this.building = building;
@@ -29,7 +29,7 @@ public class Controller {
     }
 
     public void start() {
-        while(true) {
+        while(floorsDoneCounter < floorsCount) {
             printer.print();
             int currentFloorNumber = elevator.getCurrentFloor();
             Floor currentFloor = building.getFloor(currentFloorNumber);
@@ -45,21 +45,17 @@ public class Controller {
             currentFloorPassengers.addAll(releasedPassengers);
 
             elevator.move();
-            try {
-                Thread.sleep(500);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
         }
     }
 
     private Direction chooseDirection(List<Passenger> currentFloorPassengers) {
+        Direction direction;
         List<Passenger> passengers = elevator.getPassengers();
         if (passengers.isEmpty()) {
             if (currentFloorPassengers.isEmpty()) {
-                return elevator.getCurrentFloor() == FIRST_FLOOR ? Direction.UP : Direction.DOWN;
+                direction = elevator.getCurrentFloor() == FIRST_FLOOR ? Direction.UP : Direction.DOWN;
             } else {
-                return currentFloorPassengers
+                direction = currentFloorPassengers
                         .stream()
                         .map(Passenger::getDirection)
                         .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()))
@@ -69,13 +65,18 @@ public class Controller {
                         .orElseThrow(() -> new RuntimeException("exception in the stream"));
             }
         } else {
-            return elevator.getCurrentFloor() == FIRST_FLOOR ? Direction.UP : elevator.getCurrentDirection();
+            direction = elevator.getCurrentFloor() == FIRST_FLOOR ? Direction.UP : elevator.getCurrentDirection();
         }
+        //catch none direction situation
+        if (direction == Direction.NONE) {
+            floorsDoneCounter++;
+        }
+        return direction;
     }
 
     public void updatePassengersGoals(Passenger passenger) {
         passenger.setStartFloor(passenger.getDestinationFloor());
-        passenger.setDestinationFloor(
-                Util.getRandomDestinationFloor(FIRST_FLOOR, floorsCount, passenger.getStartFloor()));
+        /*passenger.setDestinationFloor(
+                Util.getRandomDestinationFloor(FIRST_FLOOR, floorsCount, passenger.getStartFloor()));*/
     }
 }

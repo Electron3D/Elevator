@@ -28,6 +28,9 @@ public class Passenger {
     }
 
     public Direction getDirection() {
+        if (destinationFloor == startFloor) {
+            return Direction.NONE;
+        }
         return destinationFloor - startFloor > 0 ? Direction.UP : Direction.DOWN;
     }
 }
