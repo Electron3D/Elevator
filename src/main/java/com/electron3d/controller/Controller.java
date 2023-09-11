@@ -7,6 +7,7 @@ import com.electron3d.model.Floor;
 import com.electron3d.model.Passenger;
 import com.electron3d.view.ViewPrinter;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -19,7 +20,6 @@ public class Controller {
     private final Building building;
     private final Elevator elevator;
     private final int floorsCount;
-    private int floorsDoneCounter;
 
     public Controller(Building building) {
         this.building = building;
@@ -29,8 +29,7 @@ public class Controller {
     }
 
     public void start() {
-        while(floorsDoneCounter < floorsCount) {
-            printer.print();
+        while(!checkIfAllArrived()) {
             int currentFloorNumber = elevator.getCurrentFloor();
             Floor currentFloor = building.getFloor(currentFloorNumber);
             List<Passenger> currentFloorPassengers = currentFloor.passengers();
@@ -41,9 +40,10 @@ public class Controller {
             List<Passenger> takenPassengers = elevator.takePassengers(currentFloorPassengers);
             currentFloorPassengers.removeAll(takenPassengers);
 
-            releasedPassengers.forEach(this::updatePassengersGoals);
+            updatePassengersGoals(releasedPassengers);
             currentFloorPassengers.addAll(releasedPassengers);
 
+            printer.print();
             elevator.move();
         }
     }
@@ -51,32 +51,45 @@ public class Controller {
     private Direction chooseDirection(List<Passenger> currentFloorPassengers) {
         Direction direction;
         List<Passenger> passengers = elevator.getPassengers();
+        /*if (elevator.checkPassengersLimit()) {
+            return elevator.getCurrentDirection();
+        }*/
         if (passengers.isEmpty()) {
             if (currentFloorPassengers.isEmpty()) {
                 direction = elevator.getCurrentFloor() == FIRST_FLOOR ? Direction.UP : Direction.DOWN;
             } else {
                 direction = currentFloorPassengers
                         .stream()
+                        .filter(passenger -> !passenger.isArrived())
                         .map(Passenger::getDirection)
                         .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()))
                         .entrySet().stream()
                         .max(Map.Entry.comparingByValue())
                         .map(Map.Entry::getKey)
-                        .orElseThrow(() -> new RuntimeException("exception in the stream"));
+                        .orElse(elevator.getCurrentFloor() == FIRST_FLOOR ? Direction.UP : Direction.DOWN);
             }
         } else {
             direction = elevator.getCurrentFloor() == FIRST_FLOOR ? Direction.UP : elevator.getCurrentDirection();
         }
-        //catch none direction situation
-        if (direction == Direction.NONE) {
-            floorsDoneCounter++;
-        }
         return direction;
     }
 
-    public void updatePassengersGoals(Passenger passenger) {
-        passenger.setStartFloor(passenger.getDestinationFloor());
-        /*passenger.setDestinationFloor(
-                Util.getRandomDestinationFloor(FIRST_FLOOR, floorsCount, passenger.getStartFloor()));*/
+    private boolean checkIfAllArrived() {
+        List<Passenger> allPassengers = new ArrayList<>();
+        for (int i = 1; i <= floorsCount; i++) {
+            allPassengers.addAll(building.getFloor(i).passengers());
+        }
+        for (Passenger passenger : allPassengers) {
+            if (!passenger.isArrived()) {
+                return false;
+            }
+        }
+        return true;
+    }
+    private void updatePassengersGoals(List<Passenger> releasedPassengers) {
+        for (Passenger passenger : releasedPassengers) {
+            passenger.setStartFloor(passenger.getDestinationFloor());
+            passenger.setArrived(true);
+        }
     }
 }

@@ -5,10 +5,12 @@ import com.electron3d.Direction;
 public class Passenger {
     private int startFloor;
     private int destinationFloor;
+    private boolean arrived;
 
     public Passenger(int startFloor, int destinationFloor) {
         this.startFloor = startFloor;
         this.destinationFloor = destinationFloor;
+        arrived = false;
     }
 
     public int getStartFloor() {
@@ -28,9 +30,14 @@ public class Passenger {
     }
 
     public Direction getDirection() {
-        if (destinationFloor == startFloor) {
-            return Direction.NONE;
-        }
         return destinationFloor - startFloor > 0 ? Direction.UP : Direction.DOWN;
+    }
+
+    public boolean isArrived() {
+        return arrived;
+    }
+
+    public void setArrived(boolean arrived) {
+        this.arrived = arrived;
     }
 }
