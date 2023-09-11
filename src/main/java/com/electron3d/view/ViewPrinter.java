@@ -32,6 +32,7 @@ public class ViewPrinter {
                 .toList());
         System.out.println("--------------------------------------------------------------\n");
     }
+
     public void print() {
         int floorsCount = building.getFloorsCount();
         for (int i = 0; i < floorsCount; i++) {
