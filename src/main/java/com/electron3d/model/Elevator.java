@@ -56,7 +56,7 @@ public class Elevator {
             if (checkPassengersLimit()) {
                 break;
             }
-            if (currentDirection.equals(passenger.getDirection())) {
+            if (passenger.isInTransit() && currentDirection.equals(passenger.getDirection())) {
                 passengers.add(passenger);
                 takenPassengers.add(passenger);
             }

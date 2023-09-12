@@ -16,23 +16,6 @@ public class ViewPrinter {
         this.elevator = building.getElevator();
     }
 
-    public void oldPrint() {
-        int currentFloor = elevator.getCurrentFloor();
-        System.out.println("--------------------------------------------------------------");
-        System.out.println("Building is " + building.getFloorsCount() + " floors high.");
-        System.out.println("Current floor: " + currentFloor + " Direction: " + elevator.getCurrentDirection());
-        System.out.println("Passengers on the floor: " + building.getFloor(currentFloor)
-                .passengers()
-                .stream()
-                .map(Passenger::getDestinationFloor)
-                .toList());
-        System.out.println("Passengers in the elevator: " + elevator.getPassengers()
-                .stream()
-                .map(Passenger::getDestinationFloor)
-                .toList());
-        System.out.println("--------------------------------------------------------------\n");
-    }
-
     public void print() {
         int floorsCount = building.getFloorsCount();
         StringBuilder builder = new StringBuilder();
@@ -53,17 +36,22 @@ public class ViewPrinter {
             builder.append(delimiter);
             List<Integer> elevPassDestinFloor = elevator.getPassengers().stream().map(Passenger::getDestinationFloor).toList();
             if (elevator.getCurrentFloor() == i) {
-                int freeSpace = 5;
-                int oneDigitIntCounter = 0;
-                for (Integer integer : elevPassDestinFloor) {
-                    builder.append("[").append(integer).append("]");
-                    if (integer < 10) {
-                        oneDigitIntCounter++;
+                if (elevator.getPassengers().isEmpty()) {
+                    builder.append("[]  ");
+                    builder.append(onePassSpace.repeat(4));
+                } else {
+                    int freeSpace = 5;
+                    int oneDigitIntCounter = 0;
+                    for (Integer integer : elevPassDestinFloor) {
+                        builder.append("[").append(integer).append("]");
+                        if (integer < 10) {
+                            oneDigitIntCounter++;
+                        }
+                        freeSpace--;
                     }
-                    freeSpace--;
+                    builder.append(" ".repeat(oneDigitIntCounter));
+                    builder.append(onePassSpace.repeat(Math.max(0, freeSpace)));
                 }
-                builder.append(" ".repeat(oneDigitIntCounter));
-                builder.append(onePassSpace.repeat(Math.max(0, freeSpace)));
             } else {
                 builder.append(onePassSpace.repeat(5));
             }

@@ -35,12 +35,12 @@ public class Controller {
             List<Passenger> currentFloorPassengers = currentFloor.passengers();
 
             List<Passenger> releasedPassengers = elevator.releasePassengers();
+            updatePassengersGoals(releasedPassengers);
+
             elevator.setCurrentDirection(chooseDirection(currentFloorPassengers));
 
             List<Passenger> takenPassengers = elevator.takePassengers(currentFloorPassengers);
             currentFloorPassengers.removeAll(takenPassengers);
-
-            updatePassengersGoals(releasedPassengers);
             currentFloorPassengers.addAll(releasedPassengers);
 
             printer.print();
@@ -51,25 +51,29 @@ public class Controller {
     private Direction chooseDirection(List<Passenger> currentFloorPassengers) {
         Direction direction;
         List<Passenger> passengers = elevator.getPassengers();
-        /*if (elevator.checkPassengersLimit()) {
-            return elevator.getCurrentDirection();
-        }*/
         if (passengers.isEmpty()) {
             if (currentFloorPassengers.isEmpty()) {
-                direction = elevator.getCurrentFloor() == FIRST_FLOOR ? Direction.UP : Direction.DOWN;
+                direction = getDefaultDirection();
             } else {
                 direction = currentFloorPassengers
                         .stream()
-                        .filter(passenger -> !passenger.isArrived())
+                        .filter(Passenger::isInTransit)
                         .map(Passenger::getDirection)
                         .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()))
                         .entrySet().stream()
                         .max(Map.Entry.comparingByValue())
                         .map(Map.Entry::getKey)
-                        .orElse(elevator.getCurrentFloor() == FIRST_FLOOR ? Direction.UP : Direction.DOWN);
+                        .orElse(getDefaultDirection());
             }
         } else {
-            direction = elevator.getCurrentFloor() == FIRST_FLOOR ? Direction.UP : elevator.getCurrentDirection();
+            direction = passengers
+                    .stream()
+                    .map(Passenger::getDirection)
+                    .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()))
+                    .entrySet().stream()
+                    .max(Map.Entry.comparingByValue())
+                    .map(Map.Entry::getKey)
+                    .orElse(getDefaultDirection());
         }
         return direction;
     }
@@ -79,17 +83,36 @@ public class Controller {
         for (int i = 1; i <= floorsCount; i++) {
             allPassengers.addAll(building.getFloor(i).passengers());
         }
+        List<Passenger> elevatorPassengers = elevator.getPassengers();
+        allPassengers.addAll(elevatorPassengers);
         for (Passenger passenger : allPassengers) {
-            if (!passenger.isArrived()) {
+            if (passenger.isInTransit()) {
                 return false;
             }
         }
         return true;
     }
+
     private void updatePassengersGoals(List<Passenger> releasedPassengers) {
         for (Passenger passenger : releasedPassengers) {
             passenger.setStartFloor(passenger.getDestinationFloor());
             passenger.setArrived(true);
+        }
+    }
+
+    private Direction getDefaultDirection() {
+        if (elevator.getCurrentDirection() == Direction.UP) {
+            if (elevator.getCurrentFloor() < building.getFloorsCount()) {
+                return Direction.UP;
+            } else {
+                return Direction.DOWN;
+            }
+        } else {
+            if (elevator.getCurrentFloor() > FIRST_FLOOR) {
+                return Direction.DOWN;
+            } else {
+                return Direction.UP;
+            }
         }
     }
 }
